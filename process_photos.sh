@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Invocation
-# find /path/to/your/main_directory -maxdepth 2 -mindepth 2 -type f -exec /path/to/your/process.sh {} "destination_dir"\;
+# find /path/to/your/main_directory -maxdepth 2 -mindepth 2 -type f -exec /path/to/your/process.sh {} "destination_dir" \;
 
 filename=$1
 dest=$2
@@ -15,7 +15,7 @@ echo $year "   "  $month "   "  $filename
 
 
 if [ -n "$year" ]; then
-    destination="$dest/year/$month"
+    destination="$dest/$year/$month"
 else
   # No time data found in EXIF
   destination="$dest/no-time-data"
