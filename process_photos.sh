@@ -7,21 +7,48 @@ filename=$1
 dest=$2
 
 # Extracting EXIF data
-name=$(basename $filename)
-year=$(exiftool "$filename" | grep Create | head -1 | cut -d':' -f2 | tr -d ' ')
-month=$(exiftool "$filename" | grep Create | head -1 | cut -d':' -f3 | tr -d ' ')
+ext="${filename##*.}"
 
-echo $year "   "  $month "   "  $filename
+frame=$(exiftool -s3 -ShutterCount "$filename")
+model=$(exiftool -s3 -Model "$filename")
+camera="${model// /-}"
 
-
-if [ -n "$year" ]; then
-    destination="$dest/$year/$month"
+if [ "model"x != "x" ]; then
+    name=${camera}_${frame}.${ext}
 else
-  # No time data found in EXIF
-  destination="$dest/no-time-data"
+    name=$(basename "$filename")
 fi
 
-if [ -n "$destination" ]; then
-    mkdir -p "$destination"
-    cp "$filename" "$destination/"
+year=$(exiftool -s3 -CreateDate -d "%Y" "$filename")
+month=$(exiftool -s3 -CreateDate -d "%m" "$filename")
+day=$(exiftool -s3 -CreateDate -d "%d" "$filename")
+time=$(exiftool -s3 -CreateDate -d "%H_%M_%S" "$filename")
+
+
+if [ "$year"x = "x" ]; then
+    year=$(exiftool -s3 -DateTimeOriginal -d "%Y" "$filename")
+    month=$(exiftool -s3 -DateTimeOriginal -d "%m" "$filename")
+    day=$(exiftool -s3 -DateTimeOriginal -d "%d" "$filename")
+    time=$(exiftool -s3 -DateTimeOriginal -d "%H_%M_%S" "$filename")
 fi
+
+
+
+
+if [ "$year"x = "x" ]; then
+      # No time data found in EXIF
+    destination="$dest/no-time-data"
+    mkdir -p ${destination}
+    name=$(basename "$filename")
+    cp "$filename" "${destination}/${name}"
+    echo "$filename" " --> " "${destination}/${name}"
+else
+    destination="$dest/$year/$month"
+    mkdir -p ${destination}
+    cp "$filename" "${destination}/${year}_${month}_${day}_${time}_${name}"
+    echo "$filename" " --> " "${destination}/${year}_${month}_${day}_${time}_${name}"
+fi
+
+
+
+
