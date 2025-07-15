@@ -4,9 +4,9 @@
 user=$USER
 
 # copy from:
-src_folder="/Volumes/$USER/Pictures/Photos Library/"
+src_folder="/Users/$USER/Pictures/Photos\ Library.photoslibrary/originals"
 # copy to:
-destination_folder=/Volumes/my_backup_drive/photos
+destination_folder="/Volumes/my_backup_drive/photos"
 
-find /Users/aa3025/Pictures/Photos\ Library.photoslibrary/originals -maxdepth 2 -mindepth 2 -type f -exec /Users/aa3025/Pictures/process_photos.sh {} "src_folder" "$destination_folder" \;
+find "$src_folder" -maxdepth 2 -mindepth 2 -type f -exec ./process_photos.sh {} "$destination_folder" \;
 
