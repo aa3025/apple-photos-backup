@@ -7,6 +7,9 @@ filename=$1
 dest=$2
 HASH_DEDUP=${HASH_DEDUP:-0}
 
+# Normalize destination path so callers can pass with or without trailing slash.
+dest="${dest%/}"
+
 sanitize_filename_component() {
     local input="$1"
     local sanitized
@@ -63,13 +66,12 @@ frame=$(exiftool -s3 -ShutterCount "$filename")
 model=$(exiftool -s3 -Model "$filename")
 camera="${model// /-}"
 
-if [ -z "$frame" ]; then
-    # Avoid empty suffixes (e.g. ..._NIKON-D700_.ext) when shutter count is missing.
-    frame=$(shasum -a 1 "$filename" | awk '{print substr($1,1,10)}')
-fi
-
 if [ "$model"x != "x" ]; then
-    name=${camera}_${frame}.${ext}
+    if [ -n "$frame" ]; then
+        name=${camera}_${frame}.${ext}
+    else
+        name=${camera}_${original_stem}.${ext}
+    fi
 else
     name=${original_stem}.${ext}
 fi
@@ -111,7 +113,7 @@ if [ "$year"x = "x" ]; then
         echo "SKIP (exists): $target_path"
     fi
 else
-    destination="$dest/$year/$month"
+    destination="$dest/$year/$month/$day"
     mkdir -p "$destination"
     target_name=$(sanitize_filename_component "${year}_${month}_${day}_${time}_${name}")
     target_path="${destination}/${target_name}"
